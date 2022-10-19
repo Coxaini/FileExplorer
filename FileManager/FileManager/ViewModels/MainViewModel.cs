@@ -19,18 +19,24 @@ namespace FileManager.ViewModels
     {
         public ObservableCollection<Directory> Directories { get; } = new ObservableCollection<Directory>();
 
-        private Directory? selectedDirectory;
+        private Directory selectedDirectory;
 
-        public Directory? SelectedDirectory { 
+        public Directory SelectedDirectory {
             get { return selectedDirectory; }
             set
             {
                 SetProperty(ref selectedDirectory, value);
                 SelectedDirectory?.LoadData();
+                RaisePropertyChanged(nameof(AllFiles));
             }
         }
 
-        
+        public ObservableCollection<IFileable> AllFiles { get {
+                if (SelectedDirectory != null)
+                    return SelectedDirectory.GetAllFiles();
+                else
+                    return new ObservableCollection<IFileable>();
+            }}
 
        
         public DelegateCommand<Directory> SelectedDirectoryCommand { get;}

@@ -5,10 +5,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Xml.Linq;
 
 namespace FileManager.Models
 {
@@ -16,32 +18,39 @@ namespace FileManager.Models
     {
         private string _name;
         private string _fullName;
+        private DirectoryInfo directoryInfo;
 
         public ObservableCollection<Directory> Children { get; } = new ObservableCollection<Directory>();
 
-        public Directory( string name ,string fullName)
+        public Directory(string fullName)
         {
             FullName = fullName;
-            Name = name;
-
+            
             if (FullName == "*")
                 return;
             if(Children.Count == 0)
-            Children.Add(new Directory("*", "*"));
+            Children.Add(new Directory("*"));
 
-            
             directoryInfo = new DirectoryInfo(FullName);
-            
-           
 
-
+            Name = directoryInfo.Name;
         }
 
         public string Name
         {
             get { return _name; }
-            set
+            private set
             {
+                //Change name of directory
+               /* try
+                {
+                    directoryInfo.MoveTo(directoryInfo.Root.FullName + "\\" + value);
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }*/
                 _name = value;
                 RaisePropertyChanged("Name");
             }
@@ -56,8 +65,18 @@ namespace FileManager.Models
         public string FullName
         {
             get { return _fullName; }
-            set
+            private set
             {
+              /*  try
+                {
+                    directoryInfo.MoveTo(value);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }*/
+
                 _fullName = value;
                 RaisePropertyChanged("FullName");
             }
@@ -65,7 +84,7 @@ namespace FileManager.Models
 
         public long Size { get => 0; }
 
-        private DirectoryInfo directoryInfo;
+       
 
         public static ObservableCollection<Directory> GetDrives()
         {
@@ -73,7 +92,7 @@ namespace FileManager.Models
             DriveInfo[] driveInfos = DriveInfo.GetDrives();
             foreach (DriveInfo driveInfo in driveInfos)
             {
-                directories.Add(new Directory(driveInfo.Name, driveInfo.Name));
+                directories.Add(new Directory( driveInfo.Name));
             }
             return directories;
         }
@@ -92,7 +111,7 @@ namespace FileManager.Models
             {
                 foreach (DirectoryInfo subDir in directoryInfo.GetDirectories())
                 {
-                    Directory directory = new Directory(subDir.Name ,subDir.FullName);
+                    Directory directory = new Directory(subDir.FullName);
                     Children.Add(directory);
                 }
             }
@@ -101,6 +120,28 @@ namespace FileManager.Models
                 MessageBox.Show(e.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        public ObservableCollection<IFileable> GetAllFiles()
+        {
+            ObservableCollection<IFileable> files = new ObservableCollection<IFileable>(Children);
+
+            try
+            {
+                foreach (FileInfo file in directoryInfo.GetFiles())
+                {
+                    IFileable f = new File(file.FullName);
+                    files.Add(f);
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            return files;
+
+        }
+
 
     }
 }

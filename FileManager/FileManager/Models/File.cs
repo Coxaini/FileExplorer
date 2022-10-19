@@ -12,6 +12,9 @@ namespace FileManager.Models
     {
 
         private FileInfo fileInfo;
+        private string _name;
+        private string _fullName;
+
 
         public File( string fullname)
         {   
@@ -20,10 +23,18 @@ namespace FileManager.Models
             Name = fileInfo.Name;
             
         }
+        
+        public string Name { get => _name; private set
+        {
+                _name = value;
+                RaisePropertyChanged("Name");
+        } }
 
-        public string Name { get; set; }
-
-        public string FullName { get; set; }
+        public string FullName { get => _fullName; private set
+            {
+                _fullName = value;
+                RaisePropertyChanged("FullName");
+            } }
 
         public long Size { get => fileInfo.Length; }
 

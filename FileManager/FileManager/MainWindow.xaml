@@ -49,9 +49,10 @@
                     </Style>
                 </TreeView.ItemContainerStyle>
             </TreeView>
-            <ListView Grid.Column="3" ItemsSource="{Binding SelectedDirectory.Children}">
+            <ListView Grid.Column="3" ItemsSource="{Binding AllFiles}">
                 <ListView.View>
                     <GridView>
+                        
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="100">Ім'я</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Size}" Width="100">Розмір</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=LastWriteTime}" Width="200">Змінено</GridViewColumn>
