@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileManager.ViewModels"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:cmd ="http://www.galasoft.ch/mvvmlight"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Window.DataContext>
@@ -18,7 +17,10 @@
                 <MenuItem Header="Справка"/>
             </Menu.Items>
         </Menu>
-        <StatusBar DockPanel.Dock="Bottom">Елементів :</StatusBar>
+        <StatusBar DockPanel.Dock="Bottom">
+            <TextBlock Text="{Binding StringFormat=К-сть файлів: {0}, Path=FileCount}"></TextBlock>
+            <TextBlock Text="{Binding StringFormat=Розмір файлів: {0}, Path=FilesSize}" Margin="5 0 0 0"></TextBlock>
+        </StatusBar>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="29*" MinWidth="100"></ColumnDefinition>

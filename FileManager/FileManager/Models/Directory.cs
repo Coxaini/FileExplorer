@@ -34,6 +34,7 @@ namespace FileManager.Models
             directoryInfo = new DirectoryInfo(FullName);
 
             Name = directoryInfo.Name;
+
         }
 
         public string Name
@@ -84,7 +85,7 @@ namespace FileManager.Models
 
         public long Size { get => 0; }
 
-       
+        
 
         public static ObservableCollection<Directory> GetDrives()
         {
@@ -117,6 +118,9 @@ namespace FileManager.Models
                     Directory directory = new Directory(subDir.FullName);
                     Children.Add(directory);
                 }
+
+
+                AllFilesAndDirs = GetAllFilesAndDirectories();
             }
             catch(Exception e)
             {
@@ -124,24 +128,29 @@ namespace FileManager.Models
             }
         }
 
+        public ObservableCollection<IFileable> AllFilesAndDirs { get; private set; } = new ObservableCollection<IFileable>();
+
         public ObservableCollection<IFileable> GetAllFiles()
         {
-            ObservableCollection<IFileable> files = new ObservableCollection<IFileable>(Children);
+            ObservableCollection<IFileable> files = new ObservableCollection<IFileable>();
 
-            try
+            
+            foreach (FileInfo file in directoryInfo.GetFiles())
             {
-                foreach (FileInfo file in directoryInfo.GetFiles())
-                {
                     IFileable f = new File(file.FullName);
                     files.Add(f);
-                }
             }
-            catch (Exception e)
-            {
-                //MessageBox.Show(e.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
+            
             return files;
+        }
+
+        public ObservableCollection<IFileable> GetAllFilesAndDirectories()
+        {
+            ObservableCollection<IFileable> fils = new ObservableCollection<IFileable>(Children);
+
+            fils.AddRange(GetAllFiles());
+            
+            return fils;
 
         }
 

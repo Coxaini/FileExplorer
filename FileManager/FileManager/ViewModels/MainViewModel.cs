@@ -27,18 +27,23 @@ namespace FileManager.ViewModels
             {
                 SetProperty(ref selectedDirectory, value);
                 SelectedDirectory?.LoadData();
+                RaisePropertyChanged(nameof(FileCount));
                 RaisePropertyChanged(nameof(AllFiles));
+                RaisePropertyChanged(nameof(FilesSize));
             }
         }
 
         public ObservableCollection<IFileable> AllFiles { get {
                 if (SelectedDirectory != null)
-                    return SelectedDirectory.GetAllFiles();
+                    return SelectedDirectory.AllFilesAndDirs;
                 else
                     return new ObservableCollection<IFileable>();
          }}
-        
+
        
+        public int FileCount { get => AllFiles.Where((x)=>x is FileManager.Models.File).Count(); }
+        public long FilesSize { get => AllFiles.Select((x) => x.Size).Sum(); }
+
         public DelegateCommand<Directory> SelectedDirectoryCommand { get;}
         public DelegateCommand<IFileable> OpenDirectoryCommand { get;}
 
