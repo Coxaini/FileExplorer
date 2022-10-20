@@ -12,5 +12,6 @@ namespace FileManager.Models
         public string FullName { get; }
         public DateTime LastWriteTime { get; }
         public long Size { get; }
+        public string FileExtention { get => ""; }
     }
 }

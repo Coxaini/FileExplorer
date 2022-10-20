@@ -4,6 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileManager.ViewModels"
+        xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
@@ -19,7 +21,12 @@
         </Menu>
         <StatusBar DockPanel.Dock="Bottom">
             <TextBlock Text="{Binding StringFormat=К-сть файлів: {0}, Path=FileCount}"></TextBlock>
-            <TextBlock Text="{Binding StringFormat=Розмір файлів: {0}, Path=FilesSize}" Margin="5 0 0 0"></TextBlock>
+             <TextBlock Text="{Binding StringFormat=Розмір файлів: {0}, Path=FilesSize}" Margin="5 0 0 0"></TextBlock>
+            <StatusBarItem HorizontalAlignment="Right">
+                <ComboBox x:Name="filterCmb" Width="98" SelectedItem="{Binding ExtensionFilter, Mode=OneWayToSource}" ItemsSource="{Binding ExtensionFilters}" SelectedIndex="0"></ComboBox>
+            </StatusBarItem>
+                
+            
         </StatusBar>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -51,7 +58,7 @@
                     </Style>
                 </TreeView.ItemContainerStyle>
             </TreeView>
-            <ListView x:Name="fileView" Grid.Column="3" ItemsSource="{Binding AllFiles}">
+            <ListView x:Name="fileView" Grid.Column="3" ItemsSource="{Binding AllFilesAndDirs}">
 
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">

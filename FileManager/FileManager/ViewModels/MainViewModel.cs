@@ -27,21 +27,50 @@ namespace FileManager.ViewModels
             {
                 SetProperty(ref selectedDirectory, value);
                 SelectedDirectory?.LoadData();
+
+                SelectedDirectory.PropertyChanged += (s, a) => { RaisePropertyChanged(nameof(AllFilesAndDirs)); };
+
                 RaisePropertyChanged(nameof(FileCount));
-                RaisePropertyChanged(nameof(AllFiles));
+                RaisePropertyChanged(nameof(AllFilesAndDirs));
                 RaisePropertyChanged(nameof(FilesSize));
+
+
+                RaisePropertyChanged(nameof(ExtensionFilters));
+                ExtensionFilter = "All Files";
             }
         }
 
-        public ObservableCollection<IFileable> AllFiles { get {
+
+        public string ExtensionFilter { get=> SelectedDirectory.ShowFilter; set
+        {
+                if(SelectedDirectory != null)
+                SelectedDirectory.ShowFilter = value;
+        } }
+
+        public List<string> ExtensionFilters { get
+            {
                 if (SelectedDirectory != null)
-                    return SelectedDirectory.AllFilesAndDirs;
+                    return SelectedDirectory.GetFileExtensions();
                 else
-                    return new ObservableCollection<IFileable>();
+                    return new List<string> { "All Files" };
+            }  }
+
+        public List<IFileable> AllFilesAndDirs { get {
+                if (SelectedDirectory != null)
+                    return SelectedDirectory.AllFilesAndDirs.ToList();
+                else
+                    return new List<IFileable>();
          }}
 
+        public List<IFileable> AllFiles { get {
+                if (SelectedDirectory != null)
+                    return SelectedDirectory.Files.ToList();
+                else
+                    return new List<IFileable>();
+            } }
+
        
-        public int FileCount { get => AllFiles.Where((x)=>x is FileManager.Models.File).Count(); }
+        public int FileCount { get => AllFiles.Count(); }
         public long FilesSize { get => AllFiles.Select((x) => x.Size).Sum(); }
 
         public DelegateCommand<Directory> SelectedDirectoryCommand { get;}

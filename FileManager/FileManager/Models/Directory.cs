@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +22,15 @@ namespace FileManager.Models
         private DirectoryInfo directoryInfo;
 
         public ObservableCollection<Directory> Children { get; } = new ObservableCollection<Directory>();
+
+        public ObservableCollection<IFileable> Files { get; } = new ObservableCollection<IFileable>();
+
+        private string _showFilter = "All Files";
+        public string ShowFilter { get => _showFilter; set { SetProperty(ref _showFilter, value);
+                RaisePropertyChanged(nameof(AllFilesAndDirs));
+            } }
+
+        public ObservableCollection<IFileable> AllFilesAndDirs { get => GetAllFilesAndDirectories(ShowFilter); }
 
         public Directory(string fullName)
         {
@@ -85,8 +95,6 @@ namespace FileManager.Models
 
         public long Size { get => 0; }
 
-        
-
         public static ObservableCollection<Directory> GetDrives()
         {
             ObservableCollection<Directory> directories = new ObservableCollection<Directory>();
@@ -103,6 +111,9 @@ namespace FileManager.Models
                 return;
 
             Children.Clear();
+            Files.Clear();
+            Children.Add(new Directory("*"));
+
         }
         public override void LoadData()
         {
@@ -110,6 +121,8 @@ namespace FileManager.Models
                 return;
 
             Children.Clear();
+
+            Files.Clear();
 
             try
             {
@@ -119,16 +132,14 @@ namespace FileManager.Models
                     Children.Add(directory);
                 }
 
-
-                AllFilesAndDirs = GetAllFilesAndDirectories();
+                Files.AddRange(GetAllFiles());
+               // AllFilesAndDirs = GetAllFilesAndDirectories();
             }
             catch(Exception e)
             {
                 MessageBox.Show(e.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        public ObservableCollection<IFileable> AllFilesAndDirs { get; private set; } = new ObservableCollection<IFileable>();
 
         public ObservableCollection<IFileable> GetAllFiles()
         {
@@ -144,14 +155,40 @@ namespace FileManager.Models
             return files;
         }
 
-        public ObservableCollection<IFileable> GetAllFilesAndDirectories()
+        public ObservableCollection<IFileable> GetAllFilesAndDirectories(string filter = "")
         {
-            ObservableCollection<IFileable> fils = new ObservableCollection<IFileable>(Children);
+            ObservableCollection<IFileable> fils = new ObservableCollection<IFileable>();
 
-            fils.AddRange(GetAllFiles());
-            
+
+            if(filter == "All Files")
+            fils.AddRange(Children);
+
+            if (filter != "All Files")
+            {
+                fils.AddRange(Files.Where((x) =>
+                {
+                    return x.FileExtention == filter;
+                }));
+            }
+            else
+                fils.AddRange(Files);
+
             return fils;
+        }
 
+        public List<string> GetFileExtensions()
+        {
+            List<string> extensions = new List<string>() {"All Files"};
+
+            Files.ToList().ForEach((x) =>
+            {
+                string ext = ((File)x).FileExtention;
+                if (ext != String.Empty && !extensions.Contains(ext))
+                {
+                    extensions.Add(ext);
+                }
+            });
+            return extensions;
         }
 
 

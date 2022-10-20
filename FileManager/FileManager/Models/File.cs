@@ -39,5 +39,7 @@ namespace FileManager.Models
         public long Size { get => fileInfo.Length; }
 
         public DateTime LastWriteTime { get => fileInfo.LastWriteTime; }
+
+        public string FileExtention { get => fileInfo.Extension; }
     }
 }
