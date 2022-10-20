@@ -21,12 +21,23 @@
         </Menu>
         <StatusBar DockPanel.Dock="Bottom">
             <TextBlock Text="{Binding StringFormat=К-сть файлів: {0}, Path=FileCount}"></TextBlock>
-             <TextBlock Text="{Binding StringFormat=Розмір файлів: {0}, Path=FilesSize}" Margin="5 0 0 0"></TextBlock>
+            <TextBlock Text="{Binding StringFormat=Розмір файлів: {0}, Path=FilesSize}" Margin="5 0 0 0"></TextBlock>
+            <StatusBarItem>
+                <Grid Width="176">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <TextBlock HorizontalAlignment="Center" Text="{Binding StringFormat=Локальний диск ({0}), Path=CurrentDisc}"></TextBlock>
+                    <ProgressBar Grid.Row="1" Minimum="0" Maximum="100" Value="{Binding DiskFilling, Mode=OneWay}" Name="pbStatus" />
+                    <TextBlock Grid.Row="1" Text="{Binding FreeSpaceOnDisc}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+            </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <ComboBox x:Name="filterCmb" Width="98" SelectedItem="{Binding ExtensionFilter, Mode=OneWayToSource}" ItemsSource="{Binding ExtensionFilters}" SelectedIndex="0"></ComboBox>
             </StatusBarItem>
-                
-            
+
+
         </StatusBar>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -69,7 +80,7 @@
 
                 <ListView.View>
                     <GridView>
-                        
+
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="100">Ім'я</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Size}" Width="100">Розмір</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=LastWriteTime}" Width="200">Змінено</GridViewColumn>

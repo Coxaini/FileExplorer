@@ -47,6 +47,7 @@ namespace FileManager.Models
 
         }
 
+
         public string Name
         {
             get { return _name; }
@@ -95,7 +96,7 @@ namespace FileManager.Models
 
         public long Size { get => 0; }
 
-        public static ObservableCollection<Directory> GetDrives()
+        public static ObservableCollection<Directory> GetDirectoryDrives()
         {
             ObservableCollection<Directory> directories = new ObservableCollection<Directory>();
             DriveInfo[] driveInfos = DriveInfo.GetDrives();

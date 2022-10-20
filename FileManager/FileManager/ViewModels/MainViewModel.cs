@@ -34,18 +34,20 @@ namespace FileManager.ViewModels
                 RaisePropertyChanged(nameof(AllFilesAndDirs));
                 RaisePropertyChanged(nameof(FilesSize));
 
+                RaisePropertyChanged(nameof(CurrentDisc));
+                RaisePropertyChanged(nameof(DiskFilling));
+                RaisePropertyChanged(nameof(FreeSpaceOnDisc));
 
                 RaisePropertyChanged(nameof(ExtensionFilters));
                 ExtensionFilter = "All Files";
             }
         }
 
-
-        public string ExtensionFilter { get=> SelectedDirectory.ShowFilter; set
-        {
-                if(SelectedDirectory != null)
-                SelectedDirectory.ShowFilter = value;
-        } }
+        public string ExtensionFilter { get => SelectedDirectory.ShowFilter; set
+            {
+                if (SelectedDirectory != null)
+                    SelectedDirectory.ShowFilter = value;
+            } }
 
         public List<string> ExtensionFilters { get
             {
@@ -53,14 +55,14 @@ namespace FileManager.ViewModels
                     return SelectedDirectory.GetFileExtensions();
                 else
                     return new List<string> { "All Files" };
-            }  }
+            } }
 
         public List<IFileable> AllFilesAndDirs { get {
                 if (SelectedDirectory != null)
                     return SelectedDirectory.AllFilesAndDirs.ToList();
                 else
                     return new List<IFileable>();
-         }}
+            } }
 
         public List<IFileable> AllFiles { get {
                 if (SelectedDirectory != null)
@@ -69,7 +71,23 @@ namespace FileManager.ViewModels
                     return new List<IFileable>();
             } }
 
-       
+        private List<DriveM> driveMs = DriveInfo.GetDrives().Select(x=>new DriveM(x)).ToList();
+
+        public DriveM CurrentDisc { get {
+                if (SelectedDirectory != null)
+                    return driveMs.Find(x=>x.DiscName == Path.GetPathRoot(SelectedDirectory.FullName)) ?? driveMs[0];
+                else
+                    return driveMs[0];
+            }
+        }
+        public string FreeSpaceOnDisc { get {
+
+                return $"{CurrentDisc.AvailableFreeSpace / 1073741824} Gb вільно із {CurrentDisc.TotalSpace / 1073741824} Gb";
+
+        } }
+
+        public double DiskFilling { get => 100d - (CurrentDisc.AvailableFreeSpace * 1d / CurrentDisc.TotalSpace) * 100; }
+
         public int FileCount { get => AllFiles.Count(); }
         public long FilesSize { get => AllFiles.Select((x) => x.Size).Sum(); }
 
@@ -78,7 +96,7 @@ namespace FileManager.ViewModels
 
         public MainViewModel()
         {
-            foreach (var item in Directory.GetDrives())
+            foreach (var item in Directory.GetDirectoryDrives())
             {
                 Directories.Add(item);
             }
