@@ -105,6 +105,9 @@ namespace FileManager.Models
         }
         public override void LoadData()
         {
+            if (Children.Count != 1 || Children.First().FullName != "*")
+                return;
+
             Children.Clear();
 
             try
@@ -135,7 +138,7 @@ namespace FileManager.Models
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show(e.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             return files;

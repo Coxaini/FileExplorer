@@ -49,7 +49,15 @@
                     </Style>
                 </TreeView.ItemContainerStyle>
             </TreeView>
-            <ListView Grid.Column="3" ItemsSource="{Binding AllFiles}">
+            <ListView x:Name="fileView" Grid.Column="3" ItemsSource="{Binding AllFiles}">
+
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction CommandParameter="{Binding ElementName=fileView, Path=SelectedItem}"
+                                   Command="{Binding OpenDirectoryCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+
                 <ListView.View>
                     <GridView>
                         

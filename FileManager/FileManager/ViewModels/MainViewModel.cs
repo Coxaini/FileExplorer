@@ -36,10 +36,11 @@ namespace FileManager.ViewModels
                     return SelectedDirectory.GetAllFiles();
                 else
                     return new ObservableCollection<IFileable>();
-            }}
-
+         }}
+        
        
         public DelegateCommand<Directory> SelectedDirectoryCommand { get;}
+        public DelegateCommand<IFileable> OpenDirectoryCommand { get;}
 
         public MainViewModel()
         {
@@ -51,7 +52,20 @@ namespace FileManager.ViewModels
             SelectedDirectoryCommand = new DelegateCommand<Directory>((d) => { 
                 SelectedDirectory = d;
             });
+
+            OpenDirectoryCommand = new DelegateCommand<IFileable>((d) => {
+                if (d == null) return;
+                if(d is Directory dir)
+                {
+                    SelectedDirectory.IsExpanded = true;
+                    SelectedDirectory = dir;
+                    //SelectedDirectory.IsSelected = true;
+                    SelectedDirectory.IsExpanded = true;
+                }
+            });
+
         }
+
 
 
 

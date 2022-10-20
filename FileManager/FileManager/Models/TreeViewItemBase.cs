@@ -29,6 +29,9 @@ namespace FileManager.Models
             get { return this.isExpanded; }
             set
             {
+                if (this.isExpanded == value)
+                    return;
+
                     this.isExpanded = value;
                     if (IsExpanded)
                     {
