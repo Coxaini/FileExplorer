@@ -103,6 +103,8 @@ namespace FileManager.Models
 
         public long Size { get => 0; }
 
+        public bool IsDirectory => true;
+
         public static ObservableCollection<Directory> GetDirectoryDrives()
         {
             ObservableCollection<Directory> directories = new ObservableCollection<Directory>();

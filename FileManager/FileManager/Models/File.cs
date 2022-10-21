@@ -42,6 +42,8 @@ namespace FileManager.Models
 
         public string FileExtention { get => fileInfo.Extension; }
 
+        public bool IsDirectory => false;
+
         public Directory? Parent { get; }
 
         public void Delete()

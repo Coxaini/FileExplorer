@@ -14,6 +14,8 @@ namespace FileManager.Models
         public long Size { get; }
         public string FileExtention { get => ""; }
 
+        public bool IsDirectory { get; }
+
         public Directory? Parent { get; }
 
         public void Rename(string newName);
