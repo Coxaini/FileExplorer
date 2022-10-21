@@ -17,8 +17,10 @@ namespace FileManager.Models
             get { return this.isSelected; }
             set
             {
-                    this.isSelected = value;
-                    RaisePropertyChanged("IsSelected");
+                this.isSelected = value;
+
+
+                RaisePropertyChanged("IsSelected");
             }
         }
 
@@ -29,6 +31,9 @@ namespace FileManager.Models
             get { return this.isExpanded; }
             set
             {
+                if (this.isExpanded == value)
+                    return;
+
                     this.isExpanded = value;
                     if (IsExpanded)
                     {

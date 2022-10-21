@@ -5,10 +5,14 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Security;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Xml.Linq;
 
 namespace FileManager.Models
 {
@@ -16,32 +20,56 @@ namespace FileManager.Models
     {
         private string _name;
         private string _fullName;
+        private DirectoryInfo directoryInfo;
+
+        public Directory? Parent { get;}
 
         public ObservableCollection<Directory> Children { get; } = new ObservableCollection<Directory>();
 
-        public Directory( string name ,string fullName)
-        {
-            FullName = fullName;
-            Name = name;
+        public ObservableCollection<IFileable> Files { get; } = new ObservableCollection<IFileable>();
 
+        private string _showFilter = "All Files";
+        public string ShowFilter { get => _showFilter; set { SetProperty(ref _showFilter, value);
+                RaisePropertyChanged(nameof(AllFilesAndDirs));
+            } }
+
+        public ObservableCollection<IFileable> AllFilesAndDirs { get => GetAllFilesAndDirectories(ShowFilter); }
+
+        public Directory(string fullName , Directory parent)
+        {
+            this.Parent = parent;
+            FullName = fullName;
+            
             if (FullName == "*")
                 return;
             if(Children.Count == 0)
-            Children.Add(new Directory("*", "*"));
+            Children.Add(new Directory("*", this));
 
-            
             directoryInfo = new DirectoryInfo(FullName);
-            
-           
 
+            Name = directoryInfo.Name;
+
+            Children.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(AllFilesAndDirs));
+            Files.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(AllFilesAndDirs));
 
         }
+
 
         public string Name
         {
             get { return _name; }
-            set
+            private set
             {
+                //Change name of directory
+               /* try
+                {
+                    directoryInfo.MoveTo(directoryInfo.Root.FullName + "\\" + value);
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }*/
                 _name = value;
                 RaisePropertyChanged("Name");
             }
@@ -56,8 +84,18 @@ namespace FileManager.Models
         public string FullName
         {
             get { return _fullName; }
-            set
+            private set
             {
+              /*  try
+                {
+                    directoryInfo.MoveTo(value);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }*/
+
                 _fullName = value;
                 RaisePropertyChanged("FullName");
             }
@@ -65,15 +103,15 @@ namespace FileManager.Models
 
         public long Size { get => 0; }
 
-        private DirectoryInfo directoryInfo;
+        public bool IsDirectory => true;
 
-        public static ObservableCollection<Directory> GetDrives()
+        public static ObservableCollection<Directory> GetDirectoryDrives()
         {
             ObservableCollection<Directory> directories = new ObservableCollection<Directory>();
             DriveInfo[] driveInfos = DriveInfo.GetDrives();
             foreach (DriveInfo driveInfo in driveInfos)
             {
-                directories.Add(new Directory(driveInfo.Name, driveInfo.Name));
+                directories.Add(new Directory(driveInfo.Name, null));
             }
             return directories;
         }
@@ -83,24 +121,99 @@ namespace FileManager.Models
                 return;
 
             Children.Clear();
+            Files.Clear();
+            Children.Add(new Directory("*", this));
+
         }
         public override void LoadData()
         {
+           /* if (Children.Count != 1 || Children.First().FullName != "*")
+                return;*/
+
             Children.Clear();
 
-            try
-            {
+            Files.Clear();
+    
                 foreach (DirectoryInfo subDir in directoryInfo.GetDirectories())
                 {
-                    Directory directory = new Directory(subDir.Name ,subDir.FullName);
+                    Directory directory = new Directory(subDir.FullName, this);
                     Children.Add(directory);
                 }
-            }
-            catch(Exception e)
-            {
-                MessageBox.Show(e.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+                Files.AddRange(GetAllFiles());
+               // AllFilesAndDirs = GetAllFilesAndDirectories();
+            
         }
 
+        public ObservableCollection<IFileable> GetAllFiles()
+        {
+            ObservableCollection<IFileable> files = new ObservableCollection<IFileable>();
+
+            
+            foreach (FileInfo file in directoryInfo.GetFiles())
+            {
+                    IFileable f = new File(file.FullName, this);
+                    files.Add(f);
+            }
+            
+            return files;
+        }
+
+        public ObservableCollection<IFileable> GetAllFilesAndDirectories(string filter = "")
+        {
+            ObservableCollection<IFileable> fils = new ObservableCollection<IFileable>();
+
+
+            if(filter == "All Files")
+            fils.AddRange(Children);
+
+            if (filter != "All Files")
+            {
+                fils.AddRange(Files.Where((x) =>
+                {
+                    return x.FileExtention == filter;
+                }));
+            }
+            else
+                fils.AddRange(Files);
+
+            return fils;
+        }
+
+        public List<string> GetFileExtensions()
+        {
+            List<string> extensions = new List<string>() {"All Files"};
+
+            Files.ToList().ForEach((x) =>
+            {
+                string ext = ((File)x).FileExtention;
+                if (ext != String.Empty && !extensions.Contains(ext))
+                {
+                    extensions.Add(ext);
+                }
+            });
+            return extensions;
+        }
+
+        public void Rename(string newName)
+        {
+            DirectoryInfo? parent = directoryInfo.Parent;
+            if (parent == null)
+                throw new DirectoryNotFoundException($"Parent of directory {Name} not found");
+
+            directoryInfo.MoveTo(Path.Combine(parent.FullName, newName));
+            UpdateNames();
+        }
+
+        public void Delete()
+        {
+            directoryInfo.Delete();
+            Parent?.Children.Remove(this);
+        }
+
+        void UpdateNames()
+        {
+            FullName = directoryInfo.FullName;
+            Name = directoryInfo.Name;
+        }
     }
 }

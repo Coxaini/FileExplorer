@@ -8,9 +8,17 @@ namespace FileManager.Models
 {
     public interface IFileable
     {
-        public string Name { get; set; }
-        public string FullName { get; set; }
+        public string Name { get; }
+        public string FullName { get; }
         public DateTime LastWriteTime { get; }
         public long Size { get; }
+        public string FileExtention { get => ""; }
+
+        public bool IsDirectory { get; }
+
+        public Directory? Parent { get; }
+
+        public void Rename(string newName);
+        public void Delete();
     }
 }

@@ -12,21 +12,49 @@ namespace FileManager.Models
     {
 
         private FileInfo fileInfo;
+        private string _name;
+        private string _fullName;
 
-        public File( string fullname)
+
+        public File( string fullname, Directory parent)
         {   
             FullName = fullname;
             fileInfo = new FileInfo(FullName);
             Name = fileInfo.Name;
-            
+            Parent = parent;
         }
+        
+        public string Name { get => _name; private set
+        {
+                _name = value;
+                RaisePropertyChanged("Name");
+        } }
 
-        public string Name { get; set; }
-
-        public string FullName { get; set; }
+        public string FullName { get => _fullName; private set
+            {
+                _fullName = value;
+                RaisePropertyChanged("FullName");
+            } }
 
         public long Size { get => fileInfo.Length; }
 
         public DateTime LastWriteTime { get => fileInfo.LastWriteTime; }
+
+        public string FileExtention { get => fileInfo.Extension; }
+
+        public bool IsDirectory => false;
+
+        public Directory? Parent { get; }
+
+        public void Delete()
+        {
+            fileInfo.Delete();
+            Parent?.Files.Remove(this);
+        }
+
+        public void Rename(string newName)
+        {
+            fileInfo.MoveTo(Path.Combine(fileInfo.DirectoryName, newName));
+        }
     }
 }
