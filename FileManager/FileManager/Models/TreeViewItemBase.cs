@@ -37,7 +37,14 @@ namespace FileManager.Models
                     this.isExpanded = value;
                     if (IsExpanded)
                     {
-                        LoadData();
+                        try
+                        {
+                            LoadData();
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
                     }
                     else
                     {

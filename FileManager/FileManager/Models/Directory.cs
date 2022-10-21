@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,9 +30,7 @@ namespace FileManager.Models
         public ObservableCollection<IFileable> Files { get; } = new ObservableCollection<IFileable>();
 
         private string _showFilter = "All Files";
-        public string ShowFilter { get => _showFilter; set { SetProperty(ref _showFilter, value);
-                RaisePropertyChanged(nameof(AllFilesAndDirs));
-            } }
+        public string ShowFilter { get => _showFilter; set { SetProperty(ref _showFilter, value); } }
 
         public ObservableCollection<IFileable> AllFilesAndDirs { get => GetAllFilesAndDirectories(ShowFilter); }
 
@@ -49,9 +48,6 @@ namespace FileManager.Models
 
             Name = directoryInfo.Name;
 
-            Children.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(AllFilesAndDirs));
-            Files.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(AllFilesAndDirs));
-
         }
 
 
@@ -60,16 +56,6 @@ namespace FileManager.Models
             get { return _name; }
             private set
             {
-                //Change name of directory
-               /* try
-                {
-                    directoryInfo.MoveTo(directoryInfo.Root.FullName + "\\" + value);
-                }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }*/
                 _name = value;
                 RaisePropertyChanged("Name");
             }
@@ -86,15 +72,6 @@ namespace FileManager.Models
             get { return _fullName; }
             private set
             {
-              /*  try
-                {
-                    directoryInfo.MoveTo(value);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }*/
 
                 _fullName = value;
                 RaisePropertyChanged("FullName");
@@ -127,11 +104,11 @@ namespace FileManager.Models
         }
         public override void LoadData()
         {
-           /* if (Children.Count != 1 || Children.First().FullName != "*")
+            /*if (Children.Count != 1 || Children.First().FullName != "*")
                 return;*/
 
             Children.Clear();
-
+            
             Files.Clear();
     
                 foreach (DirectoryInfo subDir in directoryInfo.GetDirectories())
@@ -140,8 +117,7 @@ namespace FileManager.Models
                     Children.Add(directory);
                 }
                 Files.AddRange(GetAllFiles());
-               // AllFilesAndDirs = GetAllFilesAndDirectories();
-            
+     
         }
 
         public ObservableCollection<IFileable> GetAllFiles()
@@ -168,7 +144,7 @@ namespace FileManager.Models
 
             if (filter != "All Files")
             {
-                fils.AddRange(Files.Where((x) =>
+                fils.AddRange(Files.ToList().Where((x) =>
                 {
                     return x.FileExtention == filter;
                 }));

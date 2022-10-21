@@ -55,6 +55,12 @@ namespace FileManager.Models
         public void Rename(string newName)
         {
             fileInfo.MoveTo(Path.Combine(fileInfo.DirectoryName, newName));
+            UpdateNames();
+        }
+        void UpdateNames()
+        {
+            FullName = fileInfo.FullName;
+            Name = fileInfo.Name;
         }
     }
 }
