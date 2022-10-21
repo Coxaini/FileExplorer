@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -21,6 +22,8 @@ namespace FileManager.Models
         private string _fullName;
         private DirectoryInfo directoryInfo;
 
+        public Directory? Parent { get;}
+
         public ObservableCollection<Directory> Children { get; } = new ObservableCollection<Directory>();
 
         public ObservableCollection<IFileable> Files { get; } = new ObservableCollection<IFileable>();
@@ -32,18 +35,22 @@ namespace FileManager.Models
 
         public ObservableCollection<IFileable> AllFilesAndDirs { get => GetAllFilesAndDirectories(ShowFilter); }
 
-        public Directory(string fullName)
+        public Directory(string fullName , Directory parent)
         {
+            this.Parent = parent;
             FullName = fullName;
             
             if (FullName == "*")
                 return;
             if(Children.Count == 0)
-            Children.Add(new Directory("*"));
+            Children.Add(new Directory("*", this));
 
             directoryInfo = new DirectoryInfo(FullName);
 
             Name = directoryInfo.Name;
+
+            Children.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(AllFilesAndDirs));
+            Files.CollectionChanged += (s, e) => RaisePropertyChanged(nameof(AllFilesAndDirs));
 
         }
 
@@ -102,7 +109,7 @@ namespace FileManager.Models
             DriveInfo[] driveInfos = DriveInfo.GetDrives();
             foreach (DriveInfo driveInfo in driveInfos)
             {
-                directories.Add(new Directory( driveInfo.Name));
+                directories.Add(new Directory(driveInfo.Name, null));
             }
             return directories;
         }
@@ -113,33 +120,26 @@ namespace FileManager.Models
 
             Children.Clear();
             Files.Clear();
-            Children.Add(new Directory("*"));
+            Children.Add(new Directory("*", this));
 
         }
         public override void LoadData()
         {
-            if (Children.Count != 1 || Children.First().FullName != "*")
-                return;
+           /* if (Children.Count != 1 || Children.First().FullName != "*")
+                return;*/
 
             Children.Clear();
 
             Files.Clear();
-
-            try
-            {
+    
                 foreach (DirectoryInfo subDir in directoryInfo.GetDirectories())
                 {
-                    Directory directory = new Directory(subDir.FullName);
+                    Directory directory = new Directory(subDir.FullName, this);
                     Children.Add(directory);
                 }
-
                 Files.AddRange(GetAllFiles());
                // AllFilesAndDirs = GetAllFilesAndDirectories();
-            }
-            catch(Exception e)
-            {
-                MessageBox.Show(e.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            
         }
 
         public ObservableCollection<IFileable> GetAllFiles()
@@ -149,7 +149,7 @@ namespace FileManager.Models
             
             foreach (FileInfo file in directoryInfo.GetFiles())
             {
-                    IFileable f = new File(file.FullName);
+                    IFileable f = new File(file.FullName, this);
                     files.Add(f);
             }
             
@@ -192,6 +192,26 @@ namespace FileManager.Models
             return extensions;
         }
 
+        public void Rename(string newName)
+        {
+            DirectoryInfo? parent = directoryInfo.Parent;
+            if (parent == null)
+                throw new DirectoryNotFoundException($"Parent of directory {Name} not found");
 
+            directoryInfo.MoveTo(Path.Combine(parent.FullName, newName));
+            UpdateNames();
+        }
+
+        public void Delete()
+        {
+            directoryInfo.Delete();
+            Parent?.Children.Remove(this);
+        }
+
+        void UpdateNames()
+        {
+            FullName = directoryInfo.FullName;
+            Name = directoryInfo.Name;
+        }
     }
 }

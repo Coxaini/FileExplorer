@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,7 +27,15 @@ namespace FileManager.ViewModels
             set
             {
                 SetProperty(ref selectedDirectory, value);
-                SelectedDirectory?.LoadData();
+                try
+                {
+                    SelectedDirectory?.LoadData();
+                }
+                catch(Exception e)
+                {
+                    MessageBox.Show(e.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
 
                 SelectedDirectory.PropertyChanged += (s, a) => { RaisePropertyChanged(nameof(AllFilesAndDirs)); };
 
@@ -40,8 +49,17 @@ namespace FileManager.ViewModels
 
                 RaisePropertyChanged(nameof(ExtensionFilters));
                 ExtensionFilter = "All Files";
+
+                
+
             }
         }
+
+        private IFileable _selectedItem;
+        public IFileable SelectedItem { get => _selectedItem; set 
+            {
+                SetProperty(ref _selectedItem, value);   
+            } }
 
         public string ExtensionFilter { get => SelectedDirectory.ShowFilter; set
             {
@@ -93,6 +111,8 @@ namespace FileManager.ViewModels
 
         public DelegateCommand<Directory> SelectedDirectoryCommand { get;}
         public DelegateCommand<IFileable> OpenDirectoryCommand { get;}
+        public DelegateCommand<string> RenameFileCommand { get; }
+        public DelegateCommand DeleteFileCommand { get; }
 
         public MainViewModel()
         {
@@ -100,9 +120,11 @@ namespace FileManager.ViewModels
             {
                 Directories.Add(item);
             }
+            SelectedDirectory = Directories[0];
 
             SelectedDirectoryCommand = new DelegateCommand<Directory>((d) => { 
                 SelectedDirectory = d;
+                SelectedItem = SelectedDirectory;
             });
 
             OpenDirectoryCommand = new DelegateCommand<IFileable>((d) => {
@@ -116,9 +138,43 @@ namespace FileManager.ViewModels
                 }
             });
 
+            RenameFileCommand = new DelegateCommand<string>(RenameSelectedFileable);
+            DeleteFileCommand = new DelegateCommand(DeleteSelectedFileable);
         }
 
+        private void DeleteSelectedFileable()
+        {
+            try
+            {
+                SelectedItem.Delete();
 
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show(e.Message, "Помилка при видаленні", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            }
+        }
+
+        private void RenameSelectedFileable(string n)
+        {
+            if (n == null || n == String.Empty || SelectedItem == null) return;
+
+            if (Regex.IsMatch(n, @"(\\|/|<|>|\?|:|\||\*)"))
+            {
+                MessageBox.Show("Ім'я не повинно містити символи : /,\\,|,<,>,*,:", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                SelectedItem.Rename(n);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, "Помилка при перейминуванні", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
 
     }

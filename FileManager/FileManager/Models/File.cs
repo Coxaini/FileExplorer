@@ -16,12 +16,12 @@ namespace FileManager.Models
         private string _fullName;
 
 
-        public File( string fullname)
+        public File( string fullname, Directory parent)
         {   
             FullName = fullname;
             fileInfo = new FileInfo(FullName);
             Name = fileInfo.Name;
-            
+            Parent = parent;
         }
         
         public string Name { get => _name; private set
@@ -41,5 +41,18 @@ namespace FileManager.Models
         public DateTime LastWriteTime { get => fileInfo.LastWriteTime; }
 
         public string FileExtention { get => fileInfo.Extension; }
+
+        public Directory? Parent { get; }
+
+        public void Delete()
+        {
+            fileInfo.Delete();
+            Parent?.Files.Remove(this);
+        }
+
+        public void Rename(string newName)
+        {
+            fileInfo.MoveTo(Path.Combine(fileInfo.DirectoryName, newName));
+        }
     }
 }

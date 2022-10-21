@@ -69,24 +69,46 @@
                     </Style>
                 </TreeView.ItemContainerStyle>
             </TreeView>
-            <ListView x:Name="fileView" Grid.Column="3" ItemsSource="{Binding AllFilesAndDirs}">
+            <Grid Grid.Column="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.8*"></RowDefinition>
+                    <RowDefinition Height="0.15*"></RowDefinition>
+                </Grid.RowDefinitions>
 
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction CommandParameter="{Binding ElementName=fileView, Path=SelectedItem}"
+                <ListView x:Name="fileView" ItemsSource="{Binding AllFilesAndDirs}" SelectedItem="{Binding SelectedItem, Mode=OneWayToSource}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction CommandParameter="{Binding ElementName=fileView, Path=SelectedItem}"
                                    Command="{Binding OpenDirectoryCommand}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
 
-                <ListView.View>
-                    <GridView>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="100">Ім'я</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=Size}" Width="100">Розмір</GridViewColumn>
+                            <GridViewColumn DisplayMemberBinding="{Binding Path=LastWriteTime}" Width="200">Змінено</GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
 
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="100">Ім'я</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Size}" Width="100">Розмір</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=LastWriteTime}" Width="200">Змінено</GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
+                <StackPanel Grid.Row="1">
+                    <TextBox Name="fileName" FontSize="20" BorderBrush="Violet" Text="{Binding SelectedItem.Name, Mode=OneWay}"></TextBox>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type Button}">
+                                <Setter Property="Margin" Value="0,0,10,0"/>
+                            </Style>
+                        </StackPanel.Resources>
+
+                        <Button Command="{Binding RenameFileCommand}" CommandParameter="{Binding ElementName=fileName, Path=Text}">Перейменувати</Button>
+                        <Button Command="{Binding DeleteFileCommand}">Видалити</Button>
+                    </StackPanel>
+                </StackPanel>
+    
+            </Grid>
+            
+            
 
 
         </Grid>

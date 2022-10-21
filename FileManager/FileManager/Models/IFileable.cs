@@ -13,5 +13,10 @@ namespace FileManager.Models
         public DateTime LastWriteTime { get; }
         public long Size { get; }
         public string FileExtention { get => ""; }
+
+        public Directory? Parent { get; }
+
+        public void Rename(string newName);
+        public void Delete();
     }
 }
