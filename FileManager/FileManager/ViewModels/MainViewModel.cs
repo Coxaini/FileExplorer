@@ -37,9 +37,7 @@ namespace FileManager.ViewModels
                 }
 
 
-                SelectedDirectory.PropertyChanged += (s, a) => { RaisePropertyChanged(nameof(AllFilesAndDirs)); };
-
-                RaisePropertyChanged(nameof(FileCount));
+    RaisePropertyChanged(nameof(FileCount));
                 RaisePropertyChanged(nameof(AllFilesAndDirs));
                 RaisePropertyChanged(nameof(FilesSize));
 
@@ -49,9 +47,6 @@ namespace FileManager.ViewModels
 
                 RaisePropertyChanged(nameof(ExtensionFilters));
                 ExtensionFilter = "All Files";
-
-                
-
             }
         }
 
@@ -64,7 +59,10 @@ namespace FileManager.ViewModels
         public string ExtensionFilter { get => SelectedDirectory.ShowFilter; set
             {
                 if (SelectedDirectory != null)
+                {
                     SelectedDirectory.ShowFilter = value;
+                    RaisePropertyChanged(nameof(AllFilesAndDirs));
+                }
             } }
 
         public List<string> ExtensionFilters { get
@@ -147,7 +145,7 @@ namespace FileManager.ViewModels
             try
             {
                 SelectedItem.Delete();
-
+                RaisePropertyChanged(nameof(AllFilesAndDirs));
             }
             catch(Exception e)
             {

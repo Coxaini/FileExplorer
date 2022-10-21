@@ -9,7 +9,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Файловий менеджер" Height="450" Width="800">
     <Window.DataContext>
         <vmlocal:MainViewModel/>
     </Window.DataContext>
@@ -96,7 +96,6 @@
                                             <Image Source="{Binding Path=IsDirectory, Converter={StaticResource ImageFileConverter}}" Width="24" Height="24"/>
                                             <TextBlock Text="{Binding Path=Name}" Margin="2 4 0 0"></TextBlock>
                                         </StackPanel>
-                                       
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -119,14 +118,8 @@
                         <Button Command="{Binding DeleteFileCommand}">Видалити</Button>
                     </StackPanel>
                 </StackPanel>
-    
+
             </Grid>
-            
-            
-
-
         </Grid>
-
-
     </DockPanel>
 </Window>
